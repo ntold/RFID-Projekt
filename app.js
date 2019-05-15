@@ -1,10 +1,10 @@
 const serialport = require("serialport");
 
+
 // Stores the RFID id as it reconstructs from the stream.
 let id = '';
 // List of all RFID ids read
 let ids = [];
-
 
 const myPort = new serialport('/dev/cu.usbmodem14201', {
     baudRate: 9600,
@@ -27,16 +27,12 @@ myPort.on("open", function () {
         }
         id += chunk; // Concat hex chars to the forming ID
 
-
         console.log(id);
-
-        myPort.close(function (err) {
-            console.log('port closed', err);
-        });
-
 
     });
 });
+
+
 
 
 
