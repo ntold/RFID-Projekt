@@ -6,12 +6,8 @@ const RFIDSchema = new Schema({
         type: String,
         required: true,
     },
-    Name: {
-        type: String
-    },
-    Vorname: {
-        type: String
-    },
+    Name: String,
+    Vorname: String,
     lastSignIn: String,
     createdDate: String,
 });

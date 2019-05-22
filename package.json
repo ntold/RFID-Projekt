@@ -10,9 +10,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.4",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.0",
     "hex-string": "^1.0.3",
     "mongoose": "^5.5.8",
-    "serialport": "^7.1.5"
+    "serialport": "^7.1.5",
+    "socket.io": "^2.2.0"
   }
 }
