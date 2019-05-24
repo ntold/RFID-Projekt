@@ -1,41 +1,53 @@
-const serialport = require("serialport");
+const express = require('express')
+const cors = require('cors')
+const bodyParser = require('body-parser')
+const mongoose = require('mongoose')
+const config = require('./config/config')
+
+const RFID = require('./models/RFID')
+const SerialPort = require('serialport')
+const Readline = require('@serialport/parser-readline')
+const port = new SerialPort('COM4')
+
+const parser = port.pipe(new Readline({ delimiter: '\r\n' }))
+const io = require('socket.io')(4000)
+
+const app = express()
+
+app.use(bodyParser.json())
+app.use(cors())
+
+require('./routes')(app)
+
+//MongoDB connection
+mongoose.connect(config.db, { useNewUrlParser: true })
+    .then(() => console.log('Connection was successful'))
+    .catch(err => console.error("An error has eccourd:", err))
 
 
-// Stores the RFID id as it reconstructs from the stream.
-let id = '';
-// List of all RFID ids read
-let ids = [];
-
-const myPort = new serialport('/dev/cu.usbmodem14201', {
-    baudRate: 9600,
-    parser: new serialport.parsers.Readline('\n')
-});
-
-myPort.on("open", function () {
-    console.log('Serial Port Open');
-    console.log('=================');
-    let x = 0;
-    myPort.on('data', function (chunk) {
-
-        chunk = chunk.toString('ascii').match(/\w*/)[0]; // Only keep hex chars
-        if (chunk.length == 0) { // Found non-hex char
-            if (id.length > 0) { // The ID isn't blank
-                ids.push(id); // Store the completely reconstructed ID
+parser.on('data', (data) => {
+    RFID.find({ RFID: data })
+        .exec()
+        .then(rfid => {
+            if (rfid.length >= 1) {
+                let err = "RFID Schon Vorhanden!"
+                io.emit('conn', err)
+                console.log("RFID schon vorhanden!")
+            } else {
+                const rfid = new RFID({
+                    RFID: data,
+                    createdDate: new Date().toDateString()
+                })
+                rfid.save().then(result => {
+                    //emit new rfid to frontend
+                    io.emit("conn", result)
+                    console.log(result)
+                }).catch(err => {
+                    console.log(err)
+                })
             }
-            id = ''; // Prepare for the next ID read
-            return;
-        }
-        id += chunk; // Concat hex chars to the forming ID
+        })
+})
 
-        console.log(id);
-
-    });
-});
-
-
-
-
-
-
-
+app.listen(config.port, () => console.log(`Server started on port ${config.port}`))
 

@@ -6,7 +6,7 @@ const RFIDSchema = new Schema({
         type: String,
         required: true,
     },
-    Name: String,
+    Nachname: String,
     Vorname: String,
     lastSignIn: String,
     createdDate: String,
