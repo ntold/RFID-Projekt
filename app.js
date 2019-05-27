@@ -17,10 +17,10 @@ const app = express()
 app.use(bodyParser.json())
 app.use(cors())
 
-require('./routes')(app)
+require('./routes')(app, io)
 
 //MongoDB connection
-mongoose.connect(config.db, { useNewUrlParser: true })
+mongoose.connect(config.db, { useNewUrlParser: true, useFindAndModify: false })
     .then(() => console.log('Connection was successful'))
     .catch(err => console.error("An error has eccourd:", err))
 
@@ -31,7 +31,7 @@ parser.on('data', (data) => {
         .then(rfid => {
             if (rfid.length >= 1) {
                 let err = "RFID Schon Vorhanden!"
-                io.emit('conn', err)
+                io.emit('create', err)
                 console.log("RFID schon vorhanden!")
             } else {
                 const rfid = new RFID({
@@ -40,7 +40,7 @@ parser.on('data', (data) => {
                 })
                 rfid.save().then(result => {
                     //emit new rfid to frontend
-                    io.emit("conn", result)
+                    io.emit("create", result)
                     console.log(result)
                 }).catch(err => {
                     console.log(err)

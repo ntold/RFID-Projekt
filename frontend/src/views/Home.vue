@@ -10,18 +10,22 @@
           v-for="RFID in RFIDS" :key="RFID._id"
         >
           <v-card 
-            class="elevation-0 pa-4 background grey lighten-2 panel animated bounceIn"
+            class="elevation-0 pa-4 background grey lighten-2 panel animated bounceIn text-truncate"
             @click="openMenu(RFID)"
+            height="200px"
           >
             <v-layout wrap>
               <v-flex xs12 class="pa-4">
-                <h5 class="headline text-xs-center">
+                <h5 class="headline text-xs-center ">
                   {{RFID.RFID}}
                 </h5>
               </v-flex>
               <v-flex xs12 class="pa-4">
                 <div class="subheading text-xs-center">
-                  {{RFID.Nachname}} {{RFID.Vorname}}
+                  {{RFID.Nachname}} 
+                </div>
+                <div class="subheading text-xs-center">
+                  {{RFID.Vorname}}
                 </div>
               </v-flex>
             </v-layout>
@@ -41,7 +45,7 @@
             </v-flex>
             <v-flex>
               <div class="pa-3">
-                <v-text-field solo placeholder="Vorname" v-model="chipData.Vorname"></v-text-field>
+                <v-text-field solo placeholder="Vorname" :label="currentRFID.Vorname" v-model="chipData.Vorname"></v-text-field>
               </div>
             </v-flex>
             <v-flex>
@@ -76,6 +80,7 @@
                 <div class="text-xs-center">
                   <v-btn 
                     class="red darken-2"
+                    @click="remove"
                   >Delete</v-btn>
                 </div>
               </v-layout>
@@ -97,7 +102,7 @@ export default {
   data() {
     return {
       RFIDS: [],
-      currentRFID: [],
+      currentRFID: {},
       dialog: false,
       chipData: {
         Vorname: '',
@@ -106,48 +111,65 @@ export default {
     }
   },
   methods: {
-    fetchRFIDS: async function(){
+    fetch: async function(){
       try {
         let response = await RFIDService.getAll()
         this.RFIDS = response.data
+        console.log(this.RFIDS);
+        
       } catch (err) {
         console.log(err)
       }
     },
     update: async function(){
       try {
-        console.log(this.RFIDS);
-
+        this.dialog = !this.dialog
         this.chipData.Id = this.currentRFID._id
+        
         let updatedData = (await RFIDService.update(this.chipData)).data.message
+        console.log(this.RFIDS);
+        
         this.RFIDS.map(RFID => {
           if(this.currentRFID._id == updatedData._id){
             RFID.Vorname = updatedData.Vorname
             RFID.Nachname = updatedData.Nachname
           }
         })
-        
-        
+        console.log(this.RFIDS);
+          
       } catch (err) {
         console.log(err)
       }
     },
-    openMenu: function(RFID) {
-      console.log(RFID);
-      this.currentRFID = []
-      console.log(RFID);
-      this.currentRFID.push(RFID)
-      this.dialog = !this.dialog;
+    remove: async function(){
+      try {
+        console.log(this.currentRFID);
+        
+        await RFIDService.remove(this.currentRFID)
+        this.dialog = !this.dialog
+      } catch (err) {
+        console.log(err);
+      }
     },
-    
+    openMenu: function(RFID) {
+      this.currentRFID = RFID
+      this.dialog = !this.dialog
+    },
   },
   created() {
-    this.fetchRFIDS()
-    socket.on("conn", data => {
+    this.fetch()
+    socket.on("create", data => {
       if(typeof data !== "string"){
         this.RFIDS.push(data)
       }
     })
+  },
+  computed: {
+    getUpdates: function(){
+      return socket.on("update", data => {
+        console.log(data);
+      })
+    }
   }
 }
 </script>
@@ -161,5 +183,9 @@ export default {
 
 .background:hover{
   background-color: #F57C00 !important;
+}
+
+.card-wrepper{
+  
 }
 </style>

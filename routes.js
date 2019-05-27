@@ -1,6 +1,6 @@
 const RFID = require('./models/RFID')
 
-module.exports = (app) => {
+module.exports = (app, io) => {
 
     app.get("/getAll", (req, res, next) => {
         RFID.find((err, RFIDS) => {
@@ -23,12 +23,15 @@ module.exports = (app) => {
     })
     
     app.post("/delete", (req, res) => {
-        RFID.findOneAndDelete(req.body.id, (err, RFID) => {
+        console.log(req.body._id);
+        
+        RFID.deleteOne({ _id: req.body._id }, (err, RFID) => {
             if (err) {
                 res.status(500).json({
                     error: err
                 })
             }
+            io.emit("update", RFID)
             res.status(200).json({
                 message: "RFID removed"
             })
@@ -37,12 +40,19 @@ module.exports = (app) => {
     
     app.post("/update", (req, res) => {
         
-        RFID.findOneAndUpdate(req.body.Id, { Vorname: req.body.Vorname, Nachname: req.body.Nachname }, (err, RFID) => {
+        console.log(req.body);
+        
+        RFID.findByIdAndUpdate(req.body.Id, { Vorname: req.body.Vorname, Nachname: req.body.Nachname }, (err, RFID) => {
             if (err) {
                 res.status(500).json({
                     error: err
                 });
             }else{
+                //TODO
+                io.emit("update", RFID)
+                
+                console.log(RFID)
+                
                 res.status(200).json({
                     message: RFID
                 })
