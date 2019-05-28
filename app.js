@@ -31,7 +31,7 @@ parser.on('data', (data) => {
         .then(rfid => {
             if (rfid.length >= 1) {
                 let err = "RFID Schon Vorhanden!"
-                io.emit('create', err)
+                io.emit('alreadyTaken', rfid)
                 console.log("RFID schon vorhanden!")
             } else {
                 const rfid = new RFID({

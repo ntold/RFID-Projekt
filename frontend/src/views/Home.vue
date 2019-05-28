@@ -9,7 +9,7 @@
           class="pa-3"
           v-for="RFID in RFIDS" :key="RFID._id"
         >
-          <v-card 
+          <v-card
             class="elevation-0 pa-4 background grey lighten-2 panel animated bounceIn text-truncate"
             @click="openMenu(RFID)"
             height="200px"
@@ -22,10 +22,10 @@
               </v-flex>
               <v-flex xs12 class="pa-4">
                 <div class="subheading text-xs-center">
-                  {{RFID.Nachname}} 
+                  {{RFID.Vorname}}
                 </div>
                 <div class="subheading text-xs-center">
-                  {{RFID.Vorname}}
+                  {{RFID.Nachname}} 
                 </div>
               </v-flex>
             </v-layout>
@@ -115,8 +115,6 @@ export default {
       try {
         let response = await RFIDService.getAll()
         this.RFIDS = response.data
-        console.log(this.RFIDS);
-        
       } catch (err) {
         console.log(err)
       }
@@ -127,34 +125,32 @@ export default {
         this.chipData.Id = this.currentRFID._id
         
         let updatedData = (await RFIDService.update(this.chipData)).data.message
-        console.log(this.RFIDS);
-        
+
         this.RFIDS.map(RFID => {
           if(this.currentRFID._id == updatedData._id){
             RFID.Vorname = updatedData.Vorname
             RFID.Nachname = updatedData.Nachname
           }
         })
-        console.log(this.RFIDS);
           
       } catch (err) {
         console.log(err)
       }
+      this.$router.go({path: "/"})
     },
     remove: async function(){
       try {
-        console.log(this.currentRFID);
-        
         await RFIDService.remove(this.currentRFID)
         this.dialog = !this.dialog
       } catch (err) {
         console.log(err);
       }
+      this.$router.go({path: "/"})
     },
     openMenu: function(RFID) {
       this.currentRFID = RFID
       this.dialog = !this.dialog
-    },
+    }
   },
   created() {
     this.fetch()
@@ -162,6 +158,9 @@ export default {
       if(typeof data !== "string"){
         this.RFIDS.push(data)
       }
+    }),
+    socket.on("alreadyTaken", data => {
+      console.log(`The Tag ${data[0]._id} is already tracked!`)
     })
   },
   computed: {
@@ -169,23 +168,22 @@ export default {
       return socket.on("update", data => {
         console.log(data);
       })
-    }
+  }
   }
 }
 </script>
 
 <style>
 .background{
-  background-image: url('../assets/card.png');
-  background-position: center top;
+  background-image: url('../assets/tag.png');
+  background-size: cover;
+  background-position: top center;
   border-radius: 25px;
+
 }
 
 .background:hover{
   background-color: #F57C00 !important;
 }
 
-.card-wrepper{
-  
-}
 </style>
