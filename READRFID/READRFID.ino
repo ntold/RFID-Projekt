@@ -6,7 +6,7 @@
 const uint8_t RST_PIN = 9; // reset pin
 const uint8_t SS_PIN = 10; // serial data pin
 
-MFRC522 mfrc522(SS_PIN, RST_PIN); // create MFRC522 instance
+MFRC522 mfrc522(SS_PIN, RST_PIN); // create MFRC522 object
 
 void setup() {
   Serial.begin(9600); // start serial connection
