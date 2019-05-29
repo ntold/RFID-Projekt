@@ -15,8 +15,7 @@ void setup() {
 }
 
 void loop() {
-
-
+  
   if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()){
     // read uid size
     for (int i = 0; i < mfrc522.uid.size; i++) {

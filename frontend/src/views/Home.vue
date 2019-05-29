@@ -10,7 +10,8 @@
           v-for="RFID in RFIDS" :key="RFID._id"
         >
           <v-card
-            class="elevation-0 pa-4 background grey lighten-2 panel animated bounceIn text-truncate"
+            class=" animated bounceIn"
+            :class="[RFID._id == takenID ? 'active' : 'elevation-0 pa-4 background grey lighten-2 panel text-truncate' ]"
             @click="openMenu(RFID)"
             height="200px"
           >
@@ -103,6 +104,7 @@ export default {
     return {
       RFIDS: [],
       currentRFID: {},
+      takenID: '',
       dialog: false,
       chipData: {
         Vorname: '',
@@ -155,20 +157,14 @@ export default {
   created() {
     this.fetch()
     socket.on("create", data => {
-      if(typeof data !== "string"){
-        this.RFIDS.push(data)
-      }
+      this.RFIDS.push(data)
     }),
     socket.on("alreadyTaken", data => {
-      console.log(`The Tag ${data[0]._id} is already tracked!`)
+      this.takenID = data[0]._id
+      setTimeout(() => {
+        this.takenID = ''
+      }, 1000);
     })
-  },
-  computed: {
-    getUpdates: function(){
-      return socket.on("update", data => {
-        console.log(data);
-      })
-  }
   }
 }
 </script>
@@ -185,5 +181,14 @@ export default {
 .background:hover{
   background-color: #F57C00 !important;
 }
+
+.active{
+  background-image: url('../assets/tag.png');
+  background-size: cover;
+  background-position: top center;
+  border-radius: 25px;
+  background-color: #F57C00 !important;
+}
+
 
 </style>
